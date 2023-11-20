@@ -3,7 +3,7 @@ import cv2
 from pyzbar.pyzbar import decode
 import numpy as np
 import manejadorUrls as manejador
-
+import manejadorExcel as excel
 camara = cv2.VideoCapture(0)
 
 
@@ -28,9 +28,11 @@ while flag == True:
     cv2.imshow("prueba",frame)
     if cv2.waitKey(1) & 0xFF == ord('s'):
         flag = False
+        datos = []
+        datos.append(('NRO. DE FACTURA','MONTO'))
         for url in urls:
-            res = []
-            res.append(manejador.ObtenerDatos(url))
-        print(res) 
-
+            datos.append(manejador.ObtenerDatos(url))
+        path = "./prueba.xlsx"
+        excel.CrearArchivo(path)
+        excel.EditarAarchivo(path,datos) 
 camara.release()

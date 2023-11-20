@@ -3,7 +3,7 @@ from bs4 import BeautifulSoup
 
 def ObtenerDatos(url):
     response = requests.get(url)
-    datos_factura = []
+    datos_factura = ()
     if response.status_code == 200:
         soup = BeautifulSoup(response.text,'html.parser')
         tables = soup.find_all('table')
@@ -19,5 +19,5 @@ def ObtenerDatos(url):
                         data = [cell.text.strip() for cell in row.find_all('td')]
                         numero_factura = data[index_factura]
                         monto = data[index_monto]
-                        datos_factura.append({'NRO. DE FACTURA': numero_factura, 'MONTO': monto})
+                        datos_factura = ((int( numero_factura),float (monto)))
     return datos_factura
