@@ -4,7 +4,7 @@ from pyzbar.pyzbar import decode
 import numpy as np
 import manejadorUrls as manejador
 import manejadorExcel as excel
-camara = cv2.VideoCapture(0)
+camara = cv2.VideoCapture(1)
 
 
 flag = True
