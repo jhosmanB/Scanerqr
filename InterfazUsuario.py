@@ -14,6 +14,7 @@ def main(page: ft.Page):
         index = find_option_index(DropdownMenu.value)
         if index != -1:
             t.value = f"Camara  {index} seleccionada"
+            scanner.escanear(index)
         else:
             t.value = f"No se selcciono ninguna camára"
         page.update()

@@ -1,7 +1,9 @@
 import requests
 from bs4 import BeautifulSoup
+import time
 
 def ObtenerDatos(url):
+    
     response = requests.get(url)
     datos_factura = ()
     if response.status_code == 200:
@@ -19,5 +21,6 @@ def ObtenerDatos(url):
                         data = [cell.text.strip() for cell in row.find_all('td')]
                         numero_factura = data[index_factura]
                         monto = data[index_monto]
-                        datos_factura = ((int( numero_factura),float (monto)))
+                        datos_factura = ((url,int( numero_factura),float (monto)))
+    
     return datos_factura

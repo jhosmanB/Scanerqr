@@ -1,62 +1,45 @@
 import cv2
-from pyzbar.pyzbar import decode
+import numpy as np 
+import time
 
-def leer_qr():
-    # Inicializar la cámara
-    cap = cv2.VideoCapture(1)
+cap = cv2.VideoCapture(0)
+cap.set(cv2.CAP_PROP_FRAME_WIDTH,1280)
+cap.set(cv2.CAP_PROP_FRAME_HEIGHT,720)
 
-    # Obtener el tamaño del frame
-    _, frame = cap.read()
-    height, width, _ = frame.shape
+detector = cv2.QRCodeDetector()
 
-    # Definir las coordenadas del cuadrado en el centro
-    centro_cuadrado = (width // 2, height // 2)
-    tamano_cuadrado = 100  # Ajusta el tamaño del cuadrado según sea necesario
+while cap.isOpened():
+    succes,img = cap.read()
+    start = time.perf_counter()
 
-    while True:
-        # Leer un frame desde la cámara
-        ret, frame = cap.read()
+    value,points,qrcode = detector.detectAndDecode(img)
 
-        # Dibujar el cuadrado en el centro
-        x1 = centro_cuadrado[0] - tamano_cuadrado // 2
-        y1 = centro_cuadrado[1] - tamano_cuadrado // 2
-        x2 = x1 + tamano_cuadrado
-        y2 = y1 + tamano_cuadrado
-        cv2.rectangle(frame, (x1, y1), (x2, y2), (255, 0, 0), 2)
+    if value != "":
+        x1 = points[0][0][0]
+        y1 = points[0][0][1]
+        x2 = points[0][2][0]
+        y2 = points[0][2][1]
+     
+        x_center = (x2 - x1) / 2 + x1
+        y_center = (y2 - y1) / 2 + y1
 
-        # Decodificar códigos QR dentro del cuadrado
-        roi = frame[y1:y2, x1:x2]
-        codigos_qr = decode(roi)
+        cv2.rectangle(img, (int(x1), int(y1) ),(int(x2), int(y2) ),(0,255,0),2)
+        cv2.circle(img,(int(x_center),int (y_center)),5,(0,0,255),-1)
+        cv2.putText(img,str(value),(30,120),cv2.FONT_HERSHEY_COMPLEX_SMALL,1,(0,255,0),2)
 
-        # Dibujar los resultados
-        for codigo_qr in codigos_qr:
-            # Extraer la información del código QR
-            data = codigo_qr.data.decode('utf-8')
-            tipo = codigo_qr.type
+    end = time.perf_counter()
+    totalTime = end - start
 
-            # Dibujar un rectángulo alrededor del código QR en el cuadrado
-            puntos = codigo_qr.polygon
-            if len(puntos) == 4:
-                pts = []
-                for punto in puntos:
-                    pts.append((punto[0] + x1, punto[1] + y1))
-                pts = tuple(pts)
-                cv2.polylines(frame, [pts], True, (0, 255, 0), 2)
+    fps = 1 / totalTime
+    cv2.putText(img,f'FPS: {int (fps)}',(30,70),cv2.FONT_HERSHEY_COMPLEX_SMALL,1,(0,255,0),2)
 
-                # Mostrar la información del código QR
-                font = cv2.FONT_HERSHEY_SIMPLEX
-                cv2.putText(frame, f'{tipo}: {data}', (pts[0][0], pts[0][1] - 10), font, 0.5, (0, 255, 0), 2, cv2.LINE_AA)
+    cv2.imshow('img',img)
 
-        # Mostrar el frame
-        cv2.imshow('Lector QR', frame)
+    if cv2.waitKey(1) & 0xFF == 27:
+        break
 
-        # Salir del bucle si se presiona la tecla 'q'
-        if cv2.waitKey(1) & 0xFF == ord('q'):
-            break
+cap.release()
+cv2.destroyAllWindows()
 
-    # Liberar la cámara y cerrar la ventana
-    cap.release()
-    cv2.destroyAllWindows()
 
-if __name__ == "__main__":
-    leer_qr()
+
