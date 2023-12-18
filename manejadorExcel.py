@@ -26,4 +26,4 @@ def leerColumna (path,hoja, columna):
 def listaHojas(path):
    libro = openpyxl.load_workbook(path)
    hojas = libro.get_sheet_names()
-   print(hojas)
+   return hojas

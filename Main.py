@@ -1,18 +1,106 @@
+import device
+import flet as ft
 import manejadorUrls 
 import manejadorExcel as excel
+import scanner
 import time
-def main():
-    path = "./facturas.xlsx"
-    hoja = "septiembre "
-    columna = 1
-    lista_urls = excel.leerColumna(path,hoja,columna)
-    urls = list(dict.fromkeys(lista_urls))
-    datos = []
-    i = 0
-    for url in urls:
-            datos.append(manejadorUrls.ObtenerDatos(url))
-    dir_archivo = "./prueba.xlsx"
-    excel.CrearArchivo(dir_archivo)
-    excel.EditarAarchivo(dir_archivo,datos) 
+proceso_en_marcha = False
 
-main()
+def main(page: ft.Page):
+    def obtenerHojas(path):
+        hojas = excel.listaHojas(path)
+        opciones = []
+        for hoja in hojas:
+            opciones.append(ft.dropdown.Option(hoja))
+        DPMenusheets = ft.Dropdown(
+            label="Hojas",
+            hint_text="Selecciona la hoja del documento",
+            options= opciones,
+            autofocus=True,)
+        page.add(DPMenusheets,ft.ElevatedButton(
+                    "Iniciar",
+                    on_click=lambda _: construirArhivo(DPMenusheets,path),
+                    key="iniciar",
+                    data=proceso_en_marcha
+                ))
+        page.update()
+
+    def construirArhivo(DPMenusheets,path):
+      global proceso_en_marcha
+      hoja = DPMenusheets.value
+      if hoja != None : 
+         columna = 1
+         lista_urls = excel.leerColumna(path,hoja,columna)
+         datos = []
+         i = 0
+         visitados = []
+         pr = ft.ProgressRing(width=25, height=25, stroke_width = 5,color="red")
+         texto = ft.Text("Espere hasta que termine el proceso", style="headlineSmall")
+         proceso_en_marcha = True
+         page.add(pr,texto)
+         page.update()
+         for url in lista_urls:
+               if url in visitados:
+                  datos.append(("Duplicado","Duplicado"))
+               else:   
+                  datos.append(manejadorUrls.ObtenerDatos(url))
+                  visitados.append(url)   
+         dir_archivo = "./prueba.xlsx"
+         excel.CrearArchivo(dir_archivo)
+         excel.EditarAarchivo(dir_archivo,datos)
+         proceso_en_marcha = False
+         page.remove(pr,texto)
+         page.update() 
+    listaCamaras = device.getDeviceList()
+    index = 0
+    opciones = []
+    for camara in listaCamaras:
+         opciones.append(ft.dropdown.Option(camara[0]))
+         index += 1
+
+    def button_clicked(e):
+        index = find_option_index(DropdownMenu.value)
+        if index != -1:
+            t.value = f"Camara  {index} seleccionada"
+            scanner.escanear(index)
+        else:
+            t.value = f"No se selcciono ninguna camára"
+        page.update()
+    def find_option_index(option_name):
+        index = 0
+        for option in DropdownMenu.options:
+            if option_name == option.key:
+                return index
+            index +=1
+        return -1
+    def pick_files_result(e: ft.FilePickerResultEvent):
+        selected_files.value= e.files[0].path
+        path=selected_files.value
+        selected_files.update()
+        if len(path) != 0:
+            obtenerHojas(path)
+    t = ft.Text()
+    b = ft.ElevatedButton(text="Submit", on_click=button_clicked)
+    
+    DropdownMenu =  ft.Dropdown(
+            label="Cámaras",
+            hint_text="Selecciona la camara para usar",
+            options= opciones,
+            autofocus=True,
+        )
+    pick_files_dialog = ft.FilePicker(on_result=pick_files_result)
+    selected_files = ft.Text()
+    page.overlay.append(pick_files_dialog)
+    page.add(DropdownMenu,b,t, ft.Row(
+            [
+                ft.ElevatedButton(
+                    "Seleccionar archivo",
+                    icon=ft.icons.UPLOAD_FILE,
+                    on_click=lambda _: pick_files_dialog.pick_files(
+                        allow_multiple=False,allowed_extensions=["xlsx"]
+                    ),
+                ),
+                selected_files,
+            ]
+        ))
+ft.app(target=main)
