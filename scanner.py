@@ -22,7 +22,6 @@ def escanear(camara):
 
             if decoded_data:
                 urls.add(str(decoded_data))
-                print(str(decoded_data))
                 pts = np.array([code.polygon],np.int32)
                 cv2.polylines(frame,[pts], True , (255,0,0),3 )
                 cv2.putText(frame,str(decoded_data),(rect_pts[0], rect_pts[1]),cv2.FONT_HERSHEY_COMPLEX_SMALL,1,(0,255,0),2)
@@ -34,7 +33,7 @@ def escanear(camara):
             datos.append(('NRO. DE FACTURA','MONTO'))
             for url in urls:
                 datos.append(manejador.ObtenerDatos(url))
-            path = "./prueba.xlsx"
+            path = "./resultados.xlsx"
             excel.CrearArchivo(path)
             excel.EditarAarchivo(path,datos) 
     camara.release()

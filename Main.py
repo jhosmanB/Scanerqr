@@ -45,7 +45,7 @@ def main(page: ft.Page):
                else:   
                   datos.append(manejadorUrls.ObtenerDatos(url))
                   visitados.append(url)   
-         dir_archivo = "./prueba.xlsx"
+         dir_archivo = "./resultados.xlsx"
          excel.CrearArchivo(dir_archivo)
          excel.EditarAarchivo(dir_archivo,datos)
          proceso_en_marcha = False
@@ -62,7 +62,13 @@ def main(page: ft.Page):
         index = find_option_index(DropdownMenu.value)
         if index != -1:
             t.value = f"Camara  {index} seleccionada"
+            pr = ft.ProgressRing(width=25, height=25, stroke_width = 5,color="red")
+            texto = ft.Text("Espere hasta que termine el proceso", style="headlineSmall")
+            page.add(pr,texto)
+            page.update()
             scanner.escanear(index)
+            page.remove(pr,texto)
+            page.update() 
         else:
             t.value = f"No se selcciono ninguna camára"
         page.update()
@@ -80,7 +86,7 @@ def main(page: ft.Page):
         if len(path) != 0:
             obtenerHojas(path)
     t = ft.Text()
-    b = ft.ElevatedButton(text="Submit", on_click=button_clicked)
+    b = ft.ElevatedButton(text="iniciar camara", on_click=button_clicked)
     
     DropdownMenu =  ft.Dropdown(
             label="Cámaras",

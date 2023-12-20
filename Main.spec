@@ -28,10 +28,11 @@ exe = EXE(
     upx=True,
     upx_exclude=[],
     runtime_tmpdir=None,
-    console=True,
+    console=False,
     disable_windowed_traceback=False,
     argv_emulation=False,
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
+    version='C:\\Users\\CETIC1~1\\AppData\\Local\\Temp\\11f780fb-2e8f-4ed2-8e73-d2c5d14de0b2',
 )
