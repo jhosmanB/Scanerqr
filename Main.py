@@ -40,12 +40,17 @@ def main(page: ft.Page):
          page.add(pr,texto)
          page.update()
          for url in lista_urls:
-               if url in visitados:
-                  datos.append(("Duplicado","Duplicado"))
+               buscar = -1
+               try:
+                  buscar = visitados.index(url) 
+               except:
+                   buscar = -1
+               if buscar != -1:
+                  datos.append(("Duplicado","Duplicado",0,buscar + 1))
                else:   
                   datos.append(manejadorUrls.ObtenerDatos(url))
                   visitados.append(url)   
-         dir_archivo = "./resultados.xlsx"
+         dir_archivo = "./resultadospus.xlsx"
          excel.CrearArchivo(dir_archivo)
          excel.EditarAarchivo(dir_archivo,datos)
          proceso_en_marcha = False
